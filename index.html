@@ -1,103 +1,1057 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>초등 단원평가 문항 생성기</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    .question-card { border: 1px solid #ccc; padding: 15px; margin-bottom: 10px; }
-    .controls { margin-top: 10px; }
-    button { margin-right: 5px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>문항 프롬프트 생성기 </title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --secondary: #06b6d4;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 2.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            opacity: 0.95;
+            font-size: 1.05rem;
+        }
+
+        .stage-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: var(--surface);
+            border-radius: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .stage {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .stage.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .stage.completed {
+            background: var(--success);
+            color: white;
+        }
+
+        .stage.inactive {
+            background: var(--border);
+            color: var(--text-secondary);
+        }
+
+        .stage-number {
+            width: 2rem;
+            height: 2rem;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .card {
+            background: var(--surface);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+        }
+
+        .card h2 {
+            color: var(--text);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .upload-area {
+            border: 3px dashed var(--border);
+            border-radius: 1rem;
+            padding: 3rem 2rem;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            background: var(--bg);
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(79, 70, 229, 0.02);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--primary);
+            background: rgba(79, 70, 229, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-list {
+            display: none;
+            margin-top: 1.5rem;
+        }
+
+        .file-list.show {
+            display: block;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: var(--bg);
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .file-item-info {
+            flex: 1;
+        }
+
+        .file-item-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .file-item-size {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .remove-btn {
+            padding: 0.5rem 1rem;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        .remove-btn:hover {
+            background: #dc2626;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem 2rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 1rem;
+        }
+
+        .btn:hover:not(:disabled) {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn:disabled {
+            background: var(--text-secondary);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: var(--surface);
+            color: var(--text);
+            border: 2px solid var(--border);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: var(--surface);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        select, input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            background: var(--surface);
+            transition: all 0.2s;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .prompt-box {
+            background: #fef3c7;
+            border: 2px solid var(--warning);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .prompt-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .prompt-title {
+            font-weight: 700;
+            color: var(--text);
+            font-size: 1.1rem;
+        }
+
+        .prompt-content {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            max-height: 500px;
+            overflow-y: auto;
+            line-height: 1.6;
+        }
+
+        .copy-btn {
+            padding: 0.5rem 1.25rem;
+            background: var(--success);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+
+        .info-banner {
+            background: linear-gradient(135deg, #dbeafe, #e0e7ff);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-banner h3 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .info-banner p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .steps-guide {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: var(--bg);
+            border-radius: 0.5rem;
+        }
+
+        .step {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 0.5rem;
+        }
+
+        .step-number {
+            flex-shrink: 0;
+            width: 2rem;
+            height: 2rem;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.6rem;
+            }
+
+            .stage-indicator {
+                flex-direction: column;
+            }
+
+            body {
+                padding: 1rem 0.5rem;
+            }
+
+        }
+	.fixed-copy {
+	  position: sticky;
+	  top: 0;
+	  background: #fff;
+	  padding: 0.5rem;
+	  z-index: 100;
+	}
+    </style>
 </head>
 <body>
-  <h1>초등 단원평가 문항 생성기</h1>
-  
-  <!-- PDF 업로드 -->
-  <input type="file" id="pdfUpload" accept=".pdf">
-  <button onclick="extractPDF()">추출하기</button>
-  
-  <h2>문항 리스트</h2>
-  <div id="questions"></div>
-  
-  <!-- 결과물 내보내기 -->
-  <div class="controls">
-    <button onclick="downloadTxt()">TXT 다운로드</button>
-    <button onclick="downloadWord()">Word 다운로드</button>
-  </div>
-  
-  <script>
-    // 예시 문항 데이터 (실제 구현에서는 PDF 추출 결과로 대체)
-    let questions = [
-      {
-        meta: "^^5지 / 100, , , / 22SCE62013 / 62013, 100 / / / 3\nL01-1-1",
-        text: "(문제)전구에 불이 켜지는 전기 회로의 특징으로 알맞은 것은 어느 것인가요?",
-        options: [
-          "① 전구가 전지의 한쪽 극에만 연결되어 있습니다.",
-          "② 전지, 전구, 전선이 끊기지 않게 연결되어 있습니다.",
-          "③ 전구가 연결되지 않아도 불이 켜집니다.",
-          "④ 전선이 연결되지 않아도 불이 켜집니다.",
-          "⑤ 전구의 꼭지와 꼭지쇠가 같은 극에 연결되어 있습니다."
-        ],
-        answer: "(정답)②",
-        explanation: "(해설)\n전구에 불이 켜지려면 전지, 전구, 전선이 끊기지 않게 연결되어야 하고 전구의 꼭지와 꼭지쇠가 전지의 (+)극과 (-)극에 각각 연결되어야 합니다."
-      }
-    ];
-    
-    function renderQuestions() {
-      const container = document.getElementById("questions");
-      container.innerHTML = "";
-      questions.forEach((q, idx) => {
-        let card = document.createElement("div");
-        card.className = "question-card";
-        card.innerHTML = `
-          <pre>${q.meta}</pre>
-          <p>${q.text}</p>
-          ${q.options.map(o => `<p>${o}</p>`).join("")}
-          <p>${q.answer}</p>
-          <p>${q.explanation}</p>
-          <div class="controls">
-            <button onclick="regenerate(${idx})">재생성</button>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
-    
-    function regenerate(index) {
-      // 실제 구현에서는 AI 호출로 해당 문항만 다시 생성
-      alert("문항 " + (index+1) + " 재생성 기능 (예시)");
-    }
-    
-    function downloadTxt() {
-      let content = questions.map(q => 
-        `${q.meta}\n${q.text}\n${q.options.join("\n")}\n${q.answer}\n${q.explanation}`
-      ).join("\n\n");
-      let blob = new Blob([content], { type: "text/plain;charset=utf-8" });
-      let link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = "questions.txt";
-      link.click();
-    }
-    
-    function downloadWord() {
-      let content = questions.map(q => 
-        `${q.meta}\n${q.text}\n${q.options.join("\n")}\n${q.answer}\n${q.explanation}`
-      ).join("\n\n");
-      let blob = new Blob([content], { type: "application/msword" });
-      let link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = "questions.doc";
-      link.click();
-    }
-    
-    function extractPDF() {
-      // 실제 구현에서는 서버 연동 필요
-      alert("PDF 추출 기능은 서버 연동 필요 (예시)");
-      renderQuestions();
-    }
-    
-    renderQuestions();
-  </script>
+    <div class="container">
+        <header>
+            <h1>문항 프롬프트 생성기</h1>
+            <p class="subtitle">PDF 추출 → AI 문항 생성 (2단계 프로세스)</p>
+        </header>
+
+        <div class="stage-indicator">
+            <div class="stage active" id="stage1">
+                <div class="stage-number">1</div>
+                <span>PDF 추출</span>
+            </div>
+            <div class="stage inactive" id="stage2">
+                <div class="stage-number">2</div>
+                <span>문항 생성</span>
+            </div>
+        </div>
+
+        <div class="info-banner">
+            <h3>💡 사용 방법</h3>
+            <p><strong>1단계:</strong> PDF 파일(들)을 업로드하면 추출 프롬프트가 생성됩니다. AI 툴에 PDF와 함께 붙여넣으세요.<br>
+            <strong>2단계:</strong> 추출 결과를 받으면 문항 생성 설정 후 생성 프롬프트를 만듭니다.<br>
+                    AI 툴에 지식 파일 4개를 넣고 생성 프롬프트를 붙여넣어 문항을 생성하세요!</p>
+        </div>
+
+        <!-- 1단계: PDF 업로드 -->
+        <div class="card" id="step1Card">
+            <h2>1단계: PDF 업로드</h2>
+            
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📄</div>
+                <p style="font-weight: 600; margin-bottom: 0.5rem;">PDF 파일(들)을 드래그하거나 클릭하세요</p>
+                <p style="font-size: 0.9rem; color: var(--text-secondary);">여러 개의 파일을 한 번에 업로드할 수 있습니다</p>
+                <input type="file" id="pdfFile" class="file-input" accept=".pdf" multiple>
+            </div>
+
+            <div class="file-list" id="fileList"></div>
+
+            <button class="btn" id="generateExtractionPrompt" disabled>추출 프롬프트 생성</button>
+
+            <div class="prompt-box" id="extractionPromptBox" style="display: none;">
+
+                <div class="prompt-header fixed-copy">
+		  <span class="prompt-title">📋 1단계: PDF 추출 프롬프트</span>
+		  <div style="display:flex; gap:0.5rem;">
+		    <button class="copy-btn" onclick="editExtractionPrompt()">✏️ 수정하기</button>
+		    <button class="copy-btn" onclick="saveExtractionPromptToFile()">💾 저장하기</button>
+		    <button class="copy-btn" onclick="copyExtractionPrompt()">📋 복사하기</button>
+		  </div>
+		</div>
+
+                <div class="steps-guide">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">아래 프롬프트를 복사하세요</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">Claude.ai에서 PDF 파일(들)과 함께 프롬프트를 붙여넣기</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">추출 결과를 받으면 "추출 완료" 버튼 클릭</div>
+                    </div>
+                </div>
+                <div class="prompt-content" id="extractionPromptText"></div>
+            </div>
+
+            <button class="btn btn-secondary" id="extractionCompleteBtn" style="display: none;" onclick="moveToStep2()">
+                ✅ 추출 완료 - 다음 단계로
+            </button>
+        </div>
+
+        <!-- 2단계: 문항 생성 -->
+        <div class="card hidden" id="step2Card">
+            <h2>2단계: 문항 생성 설정</h2>
+
+            <div class="form-group">
+                <label for="questionCategory">문항 유형</label>
+                <select id="questionCategory" onchange="updateQuestionSettings()">
+                    <option value="vacation">방학호</option>
+                    <option value="progress">진도호</option>
+                    <option value="unit" selected>단원평가</option>
+                    <option value="diagnostic">진단평가</option>
+                </select>
+            </div>
+
+            <div id="customSettings" style="display: none;">
+                <div class="form-group">
+                    <label for="questionCount">문항 개수</label>
+                    <input type="number" id="questionCount" min="1" max="20" value="10">
+                </div>
+
+                <div class="form-group">
+                    <label for="difficultyRatio">난이도 구성</label>
+                    <input type="text" id="difficultyRatio" placeholder="예: 하 4문항, 중 4문항, 상 2문항">
+                </div>
+            </div>
+
+            <div id="diagnosticSettings" style="display: none;">
+                <div class="form-group">
+                    <label for="monthNumber">진단평가 월</label>
+                    <select id="monthNumber">
+                        <option value="01">1월</option>
+                        <option value="02">2월</option>
+                        <option value="03">3월</option>
+                        <option value="04">4월</option>
+                        <option value="05">5월</option>
+                        <option value="06">6월</option>
+                        <option value="07">7월</option>
+                        <option value="08">8월</option>
+                        <option value="09">9월</option>
+                        <option value="10">10월</option>
+                        <option value="11">11월</option>
+                        <option value="12">12월</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="btn" onclick="generateQuestionPrompt()">문항 생성 프롬프트 만들기</button>
+
+            <div class="prompt-box" id="questionPromptBox" style="display: none;">
+                <div class="prompt-header fixed-copy">
+		  <span class="prompt-title">📋 2단계: 문항 생성 프롬프트</span>
+		  <div style="display:flex; gap:0.5rem;">
+		    <button class="copy-btn" onclick="editQuestionPrompt()">✏️ 수정하기</button>
+		    <button class="copy-btn" onclick="saveQuestionPromptToFile()">💾 저장하기</button>
+		    <button class="copy-btn" onclick="copyQuestionPrompt()">📋 복사하기</button>
+		  </div>
+		</div>
+
+                <div class="steps-guide">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">아래 프롬프트를 복사하세요</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">같은 Claude.ai 대화창에 붙여넣기</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">생성된 문항을 확인하고 활용하세요!</div>
+                    </div>
+                </div>
+                <div class="prompt-content" id="questionPromptText"></div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let uploadedFiles = [];
+
+        // 파일 업로드 이벤트
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('pdfFile');
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = Array.from(e.dataTransfer.files).filter(f => f.type === 'application/pdf');
+            if (files.length > 0) {
+                handleFiles(files);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFiles(Array.from(e.target.files));
+            }
+        });
+
+        function handleFiles(files) {
+            uploadedFiles = files;
+            displayFileList();
+            document.getElementById('generateExtractionPrompt').disabled = false;
+        }
+
+        function displayFileList() {
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '';
+            fileList.classList.add('show');
+
+            uploadedFiles.forEach((file, index) => {
+                const item = document.createElement('div');
+                item.className = 'file-item';
+                item.innerHTML = `
+                    <div class="file-item-info">
+                        <div class="file-item-name">${file.name}</div>
+                        <div class="file-item-size">${formatFileSize(file.size)}</div>
+                    </div>
+                    <button class="remove-btn" onclick="removeFile(${index})">삭제</button>
+                `;
+                fileList.appendChild(item);
+            });
+        }
+
+        function removeFile(index) {
+            uploadedFiles = Array.from(uploadedFiles).filter((_, i) => i !== index);
+            if (uploadedFiles.length === 0) {
+                document.getElementById('fileList').classList.remove('show');
+                document.getElementById('generateExtractionPrompt').disabled = true;
+            } else {
+                displayFileList();
+            }
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        document.getElementById('generateExtractionPrompt').addEventListener('click', () => {
+            const filenames = Array.from(uploadedFiles).map(f => f.name);
+            const filenameText = filenames.map(f => `- ${f}`).join('\n');
+
+            const extractionPrompt = `[역할 및 목적]
+너는 초등 과학 개념정리 PDF에서 문항 제작에 필요한 핵심 정보를 누락 없이 정확하게 추출하는 전처리 전문가야. 추출한 결과물은 문항 제작 AI가 바로 활용할 수 있는 소스로 사용된다. 따라서 원문 충실도가 최우선이며, 임의 요약·생략·재구성은 절대 금지야.
+
+---
+
+[작업 순서]
+
+사용자에게 개념정리 PDF 파일을 받아서 [추출 대상 영역], [추출 지침], [출력 형식]에 따라 개념유닛코드가 빠른 것부터 추출을 시작해.
+
+---
+
+[추출 대상 영역]
+
+페이지 내에서 아래 세 영역을 우선순위 순서대로 추출해. 길이 초과 시 우선순위가 높은 영역부터 완전하게 출력하고, 나머지는 이어서 출력할 것.
+
+### A. 출제 포인트[우선순위1 / 원문 100% 추출]
+- [중요] 각 페이지 상단의 표에서 개념유닛코드와 개념유닛만을 그대로 추출. 추출한 개념유닛코드는 메타데이터에 기입. 추출한 개념유닛은 출제 포인트로 활용함.
+- [중요] 각 페이지별로 실험, 개념 등 장르 표시 추가. (예: [실험], [개념], [예시], [활동]). 이때 '놀이하기', '표현하기', '활동하기' 등은 [활동]으로 분류하고 문항 생성 시 우선순위 낮음.)
+- [중요] 각 페이지별로 핵심 문장 추출
+
+### B. 이미지 추출 방식[우선순위 2 / 이미지 추출 후 번호 매핑]
+- getOperatorList()로 PDF 렌더링 명령을 직접 분석해서 이미지 객체의 위치와 크기를 계산
+**페이지 전체 렌더링 → 이미지 객체 위치 파악 → 해당 영역만 잘라내기**
+
+- 정렬 기준 (좌상 → 우하)
+  > y 좌표 기준 정렬, 같은 행(20px 오차)이면 x 기준 정렬
+  > 50px 미만 소형 이미지 자동 제외 (아이콘, 심볼 등)
+  > 겹치는 이미지 중복 제거 (IoU 50% 이상이면 하나로 처리)
+
+- 번호 매핑 우선순위
+  > 레이블 유무와 관계없이 항상 파일명 기반 번호를 새로 부여
+  > 이때 각 페이지의 가운데 큰 박스 밖에 있는 삽화, 사진, 컷 번호는 절대 추출하지 않으며 이미지 타입 식별에만 활용
+  > 파일이 여러 개일 때 번호를 파일별로 독립적으로 (1)부터 시작
+  > 하나의 파일 내 모든 페이지에 대해 번호 부여.
+${filenames.map(f => {
+    const base = f.replace('.pdf', '');
+    return `  > ${f}의 1페이지 첫 번째 이미지 → ${base}_01 (1)
+  > 같은 파일 1페이지 두 번째 이미지 → ${base}_01 (2)`;
+}).join('\n')}
+
+---
+
+[길이 초과 시 대처법]
+출력 도중 길이 제한에 걸릴 것 같으면, 임의로 내용을 줄이거나 중략하지 말고 출력 가능한 곳까지 정확히 출력한 뒤 아래 문구로 중단해.
+→ "내용이 길어 여기서 끊습니다. 이어서 추출할까요?"
+
+---
+
+[페이지 경계 처리 규칙]
+- 내용이 다음 페이지에 걸쳐 이어져 있는 경우 "(이어짐)" 표시 후 연결.
+
+---
+
+[출력 형식]
+- 아래 마크다운 형식을 엄격히 준수할 것.
+- 개념유닛코드와 개념유닛은 각 페이지 상단의 표에서 추출.
+- 각 페이지의 가운데 큰 박스 밖에 있는 삽화, 사진, 컷 번호는 절대 추출하지 않음.
+
+---
+
+[추출 지침]
+
+1. 페이지 단위 추출
+- 각 페이지마다 다음 항목을 기록:
+  > 핵심 문장
+  > 이미지 추출 내용 (단, 페이지 중앙 큰 박스 밖 삽화/사진/컷 번호는 제외)
+
+2. 파일 단위 추출
+- 파일 전체를 보고 다음 항목을 기록:
+  > 출제 포인트
+  > 추출 완료 요약
+
+[번호 매핑 규칙]
+- 레이블 유무와 관계없이 항상 파일명 기반 번호를 새로 부여
+- 각 페이지의 이미지 번호는 독립적으로 (1)부터 시작
+- 파일이 여러 개일 경우 파일별로 번호를 독립적으로 부여
+
+---
+
+📝 [(개념유닛코드 기입)] (개념 유닛 기입)_(해당 페이지 쪽수 기입, 페이지 단위 추출)
+
+(각 페이지 별 핵심 문장)
+(각 페이지 별 이미지 추출 후 번호 매핑 내역 및 이미지 설명, 이때 각 페이지의 가운데 큰 박스 밖에 있는 삽화, 사진, 컷 번호는 절대 추출하지 않음.)
+
+※ 문항 전환 가능 여부: 예 / 아니오
+※ 전환 유형 제안: (자유선지형 / 4지선다형 / 5지선다형 / 단답형 / 드래그 드랍 / 영역선택형 / 선잇기형 중 적합한 유형 제안)
+
+---
+
+🎯 [(개념유닛코드 기입)] 출제 포인트(파일 단위 추출)
+
+[항목명] (지식/이해력, 탐구력, 문제해결력 중에서 출제 포인트에 따라 기입, 지식/이해력은 [개념]과 [예시], 탐구력은 [실험]의 과정, 문제해결력은 [실험]의 결과 및 결론을 의미함. 출제 포인트에 여러 가지 항목 기입 가능)
+- (세부 내용)
+- (세부 내용)
+
+---
+
+✅ 추출 완료 요약(파일 단위 추출)
+
+| 항목 | 내용 |
+|---|---|
+| 개념유닛코드 | 코드 기입 |
+| 개념유닛 | 개념유닛 기입 |
+| 개념 | O개 |
+| 실험 | O개 |
+| 예시 | O개 |
+| 활동 | O개 |
+| 문항 전환 가능 | O개 |
+| 주요 출제 포인트 | (핵심 2~3줄 요약) |
+---
+
+업로드된 PDF 파일:
+${filenameText}
+
+이제 위 파일(들)을 분석해서 위 형식대로 추출을 시작해줘.`;
+
+            document.getElementById('extractionPromptText').textContent = extractionPrompt;
+            document.getElementById('extractionPromptBox').style.display = 'block';
+            document.getElementById('extractionCompleteBtn').style.display = 'block';
+            
+            document.getElementById('extractionPromptBox').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        function copyExtractionPrompt() {
+            const text = document.getElementById('extractionPromptText').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = event.target;
+                const original = btn.textContent;
+                btn.textContent = '✅ 복사완료!';
+                setTimeout(() => btn.textContent = original, 2000);
+            });
+        }
+
+        function moveToStep2() {
+            document.getElementById('stage1').classList.remove('active');
+            document.getElementById('stage1').classList.add('completed');
+            document.getElementById('stage2').classList.remove('inactive');
+            document.getElementById('stage2').classList.add('active');
+
+            document.getElementById('step2Card').classList.remove('hidden');
+            document.getElementById('step2Card').scrollIntoView({ behavior: 'smooth' });
+        }
+	
+	function editExtractionPrompt() {
+	  const box = document.getElementById('extractionPromptText');
+	  box.contentEditable = true;
+	  box.focus();
+	}
+
+	function saveExtractionPromptToFile() {
+	  const text = document.getElementById('extractionPromptText').innerText || document.getElementById('extractionPromptText').textContent;
+	  if (!text.trim()) {
+	    alert("⚠️ 저장할 내용이 없습니다.");
+	    return;
+	  }
+
+	  const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+	  const link = document.createElement("a");
+	  link.href = URL.createObjectURL(blob);
+	  link.download = "추출프롬프트.txt";
+	  document.body.appendChild(link);
+	  link.click();
+	  document.body.removeChild(link);
+
+	  alert("💾 추출 프롬프트 파일 저장 완료!");
+	}
+
+	function copyExtractionPrompt() {
+	  const box = document.getElementById('extractionPromptText');
+	  const text = box.innerText || box.textContent;
+	  if (!text.trim()) {
+	    alert("⚠️ 복사할 내용이 없습니다.");
+	    return;
+	  }
+	  navigator.clipboard.writeText(text).then(() => {
+	    alert("📋 추출 프롬프트 복사 완료!");
+	  }).catch(err => {
+	    console.error("복사 실패:", err);
+	    alert("⚠️ 복사에 실패했습니다.");
+	  });
+	}
+
+
+	function editQuestionPrompt() {
+	  const box = document.getElementById('questionPromptText');
+	  box.contentEditable = true;
+	  box.focus();
+	}
+
+	function saveQuestionPromptToFile() {
+	 const text = document.getElementById('questionPromptText').innerText || document.getElementById('questionPromptText').textContent;
+	 if (!text.trim()) {
+	   alert("⚠️ 저장할 내용이 없습니다.");
+	   return;
+	 }
+
+	 // Blob 객체 생성 (텍스트 파일)
+	 const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+	
+	 // 다운로드 링크 생성
+	 const link = document.createElement("a");
+	 link.href = URL.createObjectURL(blob);
+	 link.download = "문항생성프롬프트.txt"; // 저장될 파일 이름
+	 document.body.appendChild(link);
+	 link.click();
+	 document.body.removeChild(link);
+
+	 alert("💾 문항 생성 프롬프트 파일 저장 완료!");
+	}
+
+	function copyQuestionPrompt() {
+	  const box = document.getElementById('questionPromptText');
+	  const text = box.innerText || box.textContent; // contentEditable 대응
+	  if (!text.trim()) {
+	    alert("⚠️ 복사할 내용이 없습니다.");
+	    return;
+	  }
+	  navigator.clipboard.writeText(text).then(() => {
+	    alert("📋 문항 생성 프롬프트 복사 완료!");
+	  }).catch(err => {
+	    console.error("복사 실패:", err);
+	    alert("⚠️ 복사에 실패했습니다.");
+	  });
+	}
+
+        function updateQuestionSettings() {
+            const category = document.getElementById('questionCategory').value;
+            const customSettings = document.getElementById('customSettings');
+            const diagnosticSettings = document.getElementById('diagnosticSettings');
+
+            if (category === 'vacation' || category === 'progress') {
+                customSettings.style.display = 'block';
+                diagnosticSettings.style.display = 'none';
+            } else if (category === 'diagnostic') {
+                customSettings.style.display = 'none';
+                diagnosticSettings.style.display = 'block';
+            } else {
+                customSettings.style.display = 'none';
+                diagnosticSettings.style.display = 'none';
+            }
+        }
+
+	function generateQuestionPrompt() {
+	  const category = document.getElementById('questionCategory').value;
+	  let categoryText = '';
+	  let detailText = '';
+
+	  const categoryMap = {
+	    'vacation': '방학호',
+	    'progress': '진도호',
+	    'unit': '단원평가',
+	    'diagnostic': '진단평가'
+	  };
+
+	  categoryText = categoryMap[category];
+
+	  if (category === 'vacation' || category === 'progress') {
+	    const count = document.getElementById('questionCount').value;
+	    const ratio = document.getElementById('difficultyRatio').value;
+	    detailText = `문항 개수: ${count}개\n난이도 구성: ${ratio}`;
+	  } else if (category === 'unit') {
+	    detailText = `문항 개수: 총 20문항\n난이도 구성: 하 6문항, 중 10문항, 상 4문항`;
+	  } else if (category === 'diagnostic') {
+	    const month = document.getElementById('monthNumber').value;
+	    detailText = `문항 개수: 총 20문항\n난이도 구성: 하 5문항, 중 11문항, 상 4문항\n진단평가 월: ${month}월`;
+	  }
+
+	  const questionPrompt = `[시스템 역할 및 목표]\n문항 유형: ${categoryText}\n${detailText}\n\n[문항 생성 지침 자동 반영]`;
+	  document.getElementById('questionPromptText').textContent = questionPrompt;
+	  document.getElementById('questionPromptBox').style.display = 'block';
+	}
+
+        function generateQuestionPrompt() {
+            const category = document.getElementById('questionCategory').value;
+            let categoryText = '';
+            let detailText = '';
+
+            const categoryMap = {
+                'vacation': '방학호',
+                'progress': '진도호',
+                'unit': '단원평가',
+                'diagnostic': '진단평가'
+            };
+
+            categoryText = categoryMap[category];
+
+            if (category === 'vacation' || category === 'progress') {
+                const count = document.getElementById('questionCount').value;
+                const ratio = document.getElementById('difficultyRatio').value;
+                detailText = `문항 개수: ${count}개\n난이도 구성: ${ratio}`;
+            } else if (category === 'unit') {
+                detailText = `문항 개수: 총 20문항\n난이도 구성: 하 6문항, 중 10문항, 상 4문항`;
+            } else if (category === 'diagnostic') {
+                const month = document.getElementById('monthNumber').value;
+                detailText = `문항 개수: 총 20문항\n난이도 구성: 하 5문항, 중 11문항, 상 4문항\n진단평가 월: ${month}월`;
+            }
+
+            const questionPrompt = `[시스템 역할 및 목표]
+너는 초등 학습지 콘텐츠 개발 전문가이자 RPA 원고 작성 자동화 전문가야. 위에서 추출한 자료를 분석하여, 편집 매뉴얼을 완벽히 준수하는 문항을 생성하는 것이 목표야. 문항은 메타데이터, 문제, 정답, 해설로 구성되어 있어.
+
+---
+
+[참조 파일 및 적용 시점]
+작업 전, 아래 파일들을 반드시 참조할 것. 각 파일의 적용 시점을 엄수해.
+
+| 파일명 | 적용 시점 | 역할 |
+|---|---|---|
+| meta_editing_manual.md | 문항 생성 전 (상시 참조) | 메타데이터 작성 규칙 |
+| editing_manual.md | 문항 생성 전 (상시 참조) | 문항 작성 규칙 |
+| quality_rubric.md | 문항 생성 전 + 생성 직후 | 문항 품질 기준 및 자가검수 체크리스트 |
+| examples.md | 문항 생성 전 + 생성 직후 | 문항 작성 패턴 숙지 |
+
+---
+
+[작업 프로세스 전반 엄격 준수 사항]
+
+[중요] 문항을 생성하기 전에 반드시 quality_rubric.md와 examples.md를 먼저 확인해.
+[중요] 개념유닛코드가 빠른 것부터 앞번호로 오게 문항을 생성해.
+[중요] 개념유닛이 문항의 평가 기준이 되도록 문항을 생성해.
+[중요] 추출한 내용의 출제 포인트 위주로 문항을 생성해.
+[중요] 추출한 내용에서 개념/실험/예시의 비율을 확인하고 문항도 동일한 비율로 출제해
+[중요] 문항 생성 시 다른 배경 지식은 문제, 보기, 범례, 정답 등 문항 어디에도 사용하지 말 것.
+[중요] pdf의 텍스트와 이미지만을 사용해 문항을 생성해.
+[중요] 메타데이터 작성 시 meta_editing_manual.md를 100 % 준수하고 반드시 **엔터**를 사용해 두 줄로 기입해.
+[중요] 문항 생성 시 editing_manual.md를 100 % 준수해.
+[중요] 개념유닛코드가 빠르다고 해서 난이도가 쉽다는 것은 아니야. 난이도는 문항 내용과 문제 유형에 따라 판별해.
+[중요] 문제와 관련된 표나 이미지가 있는 경우 (문제) 아래에 표나 이미지를 넣고, 이미지는 설명글로 넣어.
+[중요] 출력 전, 모든 문항의 선택지는 띄어쓰기를 포함하여 길이가 짧은 것부터 길이순 배열, 띄어쓰기를 포함했을 때 길이가 완전히 같은 선지가 있다면 그것끼리만 훈민정음순(ㄱ, ㄴ, ㄷ.. )으로 자가수정 후 출력해.
+[중요] examples_good.pdf는 과학 평가 문항의 좋은 예시로써만 참고하고 완전 똑같은 문제는 생성하지마.
+
+---
+
+[작업 프로세스 규칙: 엄격 준수]
+반드시 아래의 단계로 나누어 작업을 진행해.
+
+1) 대화가 시작되면 다음 정보를 확인해.
+[문항 유형 및 개수]
+
+문항 유형: ${categoryText}
+${detailText}
+
+2) 정보를 받으면 참조 파일 4가지를 참고해 원고 텍스트를 생성해.
+  - [중요] pdf에서 파란색으로 된 텍스트는 학습 도움 자료이니 추출은 하되 직접 문항으로 전환하지 않음. 보기에서 필요한 경우만 사용.
+  - [중요] pdf에서 파란색으로 된 텍스트를 제외한 나머지는 개념, 실험 결과, 결론, 예시를 원문 그대로 추출하여 사용.
+3) 출력 순서:
+  - 문항 출력: (메타데이터) -> (문제) -> (사진/표/설명 박스/보기 박스/선택지(필요 시)) -> (정답) -> (해설)
+4) [자가검수] 출력 전, quality_rubric.md의 체크리스트를 항목별로 확인하고 문제가 있으면 스스로 수정한 뒤 출력해.
+5) 출력 전, 아래 항목을 순서대로 최종 검수하고 수정한 다음 출력해.
+  - [ ] 모든 문항의 선택지는 띄어쓰기를 포함했을 때 길이가 짧은 것부터 길이순 배열, 띄어쓰기를 포함했을 때 길이가 완전히 같은 선지가 있다면 그것끼리만 훈민정음순(ㄱ, ㄴ, ㄷ.. )으로 정렬되어 있는가? (길이가 짧은 것이 앞 번호로 오게)
+  - [ ] 추출한 내용에 표나 이미지가 있는 경우 관련된 문항에 들어갔는가?
+  - [ ] 메타데이터, 문제, 선택지, 정답, 해설의 줄바꿈이 적용되었는가? (각 요소가 한줄로 이어지지 않음)
+  - [ ] 메타데이터는 반드시 [meta_editing_manual.md]을 100% 준수했는가?
+  - [ ] quality_rubric.md의 [자가검수 체크리스트] 전체 항목 재확인
+  - [ ] 메타데이터, 문제, 정답, 해설 사이에 **엔터**를 사용해 줄 바꿈이 되었는가?
+  - [ ] 슬래시 개수 등 형식 누락 없는가?
+  - [ ] 해요체/합니다체 구분이 맞는가?
+  - [ ] 선지·해설에 개조체(명사형 종결)가 없는가?
+  - [ ] 인지능력 값이 기준에 맞는가?
+  - [ ] 정답 표기 형식이 유형별 규칙에 맞는가? (원문자/기호/숫자)
+  - [ ] 영역08 정답이 본문은 "(1) ○", 메타라인은 "1;;;" 형식으로 구분되어 있는가?
+6) 출력이 끝나면 사용자에게 "메타데이터와 내용이 잘 추출되었는지 확인해 주세요." 묻기
+
+---
+
+[출력 형식 규칙 — 모든 단계에서 예외 없이 적용]
+- 선지(①②③④⑤) 각각을 별도 줄에 출력. 선지 번호 앞에 줄바꿈 필수.
+- (문제) (정답) (해설) 태그는 각각 새 줄에서 시작.
+- ^^ 메타라인 앞뒤로 빈 줄 1개씩 삽입.
+- 문항과 문항 사이 빈 줄 2개 삽입.
+- 마크다운 기호(**, ##, --- 등) 절대 사용 금지. 순수 텍스트로만 출력.
+- 선택지 정렬 우선순위: 띄어쓰기 포함 길이 순서대로 정렬 → 띄어쓰기를 포함했을 때 길이가 완전히 같은 선지가 있다면 그것끼리만 훈민정음순(ㄱ, ㄴ, ㄷ.. )으로 정렬
+
+[오답 설계 필수 규칙]
+오답은 반드시 아래 3가지 유형 중 하나로 설계할 것:
+① 문제에 등장하지만 정답과 무관한 소재 활용
+② 원인과 결과를 뒤집은 것
+③ 문제 내용을 살짝 비튼 것 (숫자, 인물, 장소 교체 등)
+
+아래는 절대 금지:
+- 상식으로 즉시 소거되는 오답 (예: "친구들과 싸웁니다", "책이 너무 비쌌기 때문입니다")
+- 문제에 아예 등장하지 않는 소재로 만든 오답
+
+[유형 선택 규칙]
+
+5지 선다는 아래 조건을 모두 충족할 때만 사용:
+① 매력적 오답 4개를 문제/소스에서 만들 수 있을 때
+② 정답이 명확히 1개일 때
+③ 단답형으로 대체 불가능할 때
+
+조건 미충족 시 우선순위:
+단유 → 영역08 → 드래그 순으로 대체할 것.
+
+단, 단원평가, 진단평가의 경우 전체 문항 중 5지 선다가 14개 이상이어야 함.
+
+[표현 및 편집 규칙]
+세부 표현 규칙은 editing_manual.md를 참조할 것.
+핵심 사항만 아래에 요약함.
+- 문제 어미: 전 학년 '해요체' (~인가요?, ~하세요, ~쓰세요) / 선지·해설: ~습니다., ~합니다.
+- 용어: '이유' → '까닭' / '단어' → '말' 또는 '낱말'
+- [중요] 단답형(단유) 정답 길이 제한: 정답이 길어질 경우 [보기] 기호 선택형, 인물 이름 선택형, 5지/영역형으로 우회 출제함.
+- [중요] 5지 선다형 정답 텍스트 표기: (정답) 태그에는 반드시 원문자(①, ②, ③...) 형식으로 표기함.
+- [중요] 영역형(영역08) 정답 표기 — 본문과 메타라인을 반드시 구분:
+  * (정답) 태그(본문): "(1) ○" 형식으로 표기 (기호 사용 금지)
+  * ^^ 메타라인 [정답] 필드: "1;;;" 형식으로 표기 (세미콜론으로 구분)
+- [중요] 영역08 보기 최대 4개 이하. 5개면 5지 선다로 출제.
+- [중요] 부정형 발문 핵심어(않은, 아닌, 잘못, 없는, 틀린)에 반드시 밑줄 표시.
+
+[단원평가 출제 방향]
+- 단원 전체의 개념유닛을 골고루 평가하는 표준 문항으로 출제.
+- 난이도는 문제 내용과 유형을 모두 고려해서 판단할 것: 하(1) 문항은 사실 확인 중심, 문제 유형이 선잇기, 드래그, 영역선택형, [보기]가 3개 이하인 단답형인 경우 / 중(2) 문항은 개념 적용 중심 / 상(3) 문항은 추론·융합 중심으로 출제.
+
+[최종 출력 예시]
+최종 결과물의 정확한 출력 형식은 Knowledge 파일 'examples.md'를 참조할 것.
+
+---
+
+이제 위에서 추출한 내용 중 문항 전환 가능 여부, 전환 유형 제안, 출제포인트 확인하여 pdf 내용만으로 문항을 생성해줘.
+
+추출한 내용의 이미지 추출 결과와 PDF의 실제 이미지 확인하여 문제 지문과 관련있는 사진을 (문제) 아래 줄에 넣어줘.
+
+문항 생성 시 모든 문항의 선택지는 띄어쓰기를 포함하여 길이가 짧은 것부터 길이순 배열, 띄어쓰기를 포함했을 때 길이가 완전히 같은 선택지가 있다면 그것끼리만 훈민정음(ㄱ, ㄴ, ㄷ 순)으로 배열.`;
+
+            document.getElementById('questionPromptText').textContent = questionPrompt;
+            document.getElementById('questionPromptBox').style.display = 'block';
+            
+            document.getElementById('questionPromptBox').scrollIntoView({ behavior: 'smooth' });
+        }
+
+
+        updateQuestionSettings();
+    </script>
 </body>
 </html>
