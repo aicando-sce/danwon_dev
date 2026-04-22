@@ -395,13 +395,13 @@
     <div class="container">
         <header>
             <h1>문항 프롬프트 생성기</h1>
-            <p class="subtitle">PDF 추출 → AI 문항 생성 (2단계 프로세스)</p>
+            <p class="subtitle">PDF 학습 → AI 문항 생성 (2단계 프로세스)</p>
         </header>
 
         <div class="stage-indicator">
             <div class="stage active" id="stage1">
                 <div class="stage-number">1</div>
-                <span>PDF 추출</span>
+                <span>PDF 학습</span>
             </div>
             <div class="stage inactive" id="stage2">
                 <div class="stage-number">2</div>
@@ -411,8 +411,8 @@
 
         <div class="info-banner">
             <h3>💡 사용 방법</h3>
-            <p><strong>1단계:</strong> 개념정리 PDF(보안 해제)를 업로드하면 추출 프롬프트가 생성됩니다. AI 툴에 PDF와 함께 붙여 넣으세요.<br>
-            <strong>2단계:</strong> 추출 결과를 받으면 문항 생성 설정 후 생성 프롬프트를 만듭니다.<br>
+            <p><strong>1단계:</strong> 개념정리 PDF(보안 해제)를 업로드하면 학습 프롬프트가 생성됩니다. AI 툴에 PDF와 함께 붙여 넣으세요.<br>
+            <strong>2단계:</strong> 학습 결과를 받으면 문항 생성 설정 후 생성 프롬프트를 만듭니다.<br>
             <span style="margin-left:3em;"> AI 툴에 지식 파일 4개를 넣고 생성 프롬프트를 붙여 넣어 문항을 생성하세요!</p>
         </div>
 
@@ -429,12 +429,12 @@
 
             <div class="file-list" id="fileList"></div>
 
-            <button class="btn" id="generateExtractionPrompt" disabled>추출 프롬프트 생성</button>
+            <button class="btn" id="generateExtractionPrompt" disabled>학습 프롬프트 생성</button>
 
             <div class="prompt-box" id="extractionPromptBox" style="display: none;">
 
                 <div class="prompt-header fixed-copy">
-		  <span class="prompt-title">📋 1단계: PDF 추출 프롬프트</span>
+		  <span class="prompt-title">📋 1단계: PDF 학습 프롬프트</span>
 		  <div style="display:flex; gap:0.5rem;">
 		    <button class="copy-btn" onclick="editExtractionPrompt()">✏️ 수정하기</button>
 		    <button class="copy-btn" onclick="saveExtractionPromptToFile()">💾 저장하기</button>
@@ -453,14 +453,14 @@
                     </div>
                     <div class="step">
                         <div class="step-number">3</div>
-                        <div class="step-content">추출 결과를 받으면 "추출 완료" 버튼 클릭하기</div>
+                        <div class="step-content">학습 결과를 받으면 "학습 완료" 버튼 클릭하기</div>
                     </div>
                 </div>
                 <div class="prompt-content" id="extractionPromptText"></div>
             </div>
 
             <button class="btn btn-secondary" id="extractionCompleteBtn" style="display: none;" onclick="moveToStep2()">
-                ✅ 추출 완료 - 다음 단계로
+                ✅ 학습 완료 - 다음 단계로
             </button>
         </div>
 
@@ -781,12 +781,12 @@ ${filenameText}
 	  const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
 	  const link = document.createElement("a");
 	  link.href = URL.createObjectURL(blob);
-	  link.download = "추출프롬프트.txt";
+	  link.download = "학습프롬프트.txt";
 	  document.body.appendChild(link);
 	  link.click();
 	  document.body.removeChild(link);
 
-	  alert("💾 추출 프롬프트 파일 저장 완료!");
+	  alert("💾 학습 프롬프트 파일 저장 완료!");
 	}
 
 	function copyExtractionPrompt() {
@@ -797,7 +797,7 @@ ${filenameText}
 	    return;
 	  }
 	  navigator.clipboard.writeText(text).then(() => {
-	    alert("📋 추출 프롬프트 복사 완료!");
+	    alert("📋 학습 프롬프트 복사 완료!");
 	  }).catch(err => {
 	    console.error("복사 실패:", err);
 	    alert("⚠️ 복사에 실패했습니다.");
